@@ -165,6 +165,23 @@ celula *metade(celula *cabeca1) {
   return cabeca2;
 }
 
+celula *reverter(celula *cabeca1) {
+  celula *aux = cabeca1;
+  celula *ant = NULL;
+  celula *prox = NULL;
+
+  while (aux != NULL) {
+    prox = aux->prox;
+    aux->prox = ant;
+    ant = aux;
+    aux = prox;
+  }
+
+  celula *cabeca2 = ant;
+
+  return cabeca2;
+}
+
 int main(int argc, char const *argv[]) {
   // TROCA
   //  celula *cabeca = NULL;
@@ -208,10 +225,9 @@ int main(int argc, char const *argv[]) {
   printf("Antes\n");
   imprimir(cabeca1);
 
-  celula *cabeca2 = metade(cabeca1);
+  celula *cabeca2 = reverter(cabeca1);
 
   printf("Depois\n");
-  imprimir(cabeca1);
   imprimir(cabeca2);
 
   return 0;
