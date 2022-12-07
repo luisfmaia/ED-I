@@ -3,7 +3,7 @@
 #include <string.h>
 
 typedef struct {
-  char *nome;
+  char nome[30];
   int idade;
 
 } Pessoa;
@@ -20,7 +20,7 @@ No *criar_no() {
   No *node = (No *)malloc(sizeof(No));
 
   printf("Digite o nome: ");
-  scanf("%s", p->nome);
+  scanf(" %s", p->nome);
   printf("Digite a idade: ");
   scanf("%d", &p->idade);
 
@@ -29,7 +29,7 @@ No *criar_no() {
   node->filho2 = NULL;
   node->filho3 = NULL;
 
-  return;
+  return node;
 }
 
 void inserir_no(No *pai, No *novo) {
@@ -133,63 +133,125 @@ void imprimir(No *node, int tab = 0) {
   imprimir(node->filho3, tab + 1);
 }
 
+void inserir_pai(No **node) {
+  if (*node == NULL) {
+    *node = criar_no();
+    return;
+  }
+
+  char nome_pai[30];
+  printf("Digite o nome do nó pai: ");
+  scanf(" %s", nome_pai);
+
+  No *pai = busca_prof(*node, nome_pai);
+  if (pai == NULL) {
+    printf("Nó não encontrado\n");
+    return;
+  }
+
+  No *filho = criar_no();
+  inserir_no(pai, filho);
+}
+
+void buscar_pai(No *root) {
+  char nome[30];
+  printf("Digite o nome da pessoa: ");
+  scanf(" %s", nome);
+  No *no = busca_prof(root, nome);
+  if (no == NULL) {
+    printf("Pessoa não encontrada\n");
+    return;
+  }
+  printf("%s - %d\n", no->pessoa->nome, no->pessoa->idade);
+}
+
+void menu() {
+  printf("MENU\n");
+  printf("1-Inserir\n");
+  printf("2-Buscar\n");
+  printf("3-Imprimir Árvore\n");
+  printf("0-Sair\n");
+}
+
 int main(int argc, char const *argv[]) {
-  Pessoa p1, p2, p3, p4;
+  No *root = NULL;
 
-  No n1, n2, n3, n4;
+  int opc = 1;
+  while (opc != 0) {
+    menu();
+    scanf("%d", &opc);
+    switch (opc) {
+      case 1:
+        inserir_pai(&root);
+        break;
+      case 2:
+        buscar_pai(root);
+        break;
+      case 3:
+        imprimir(root);
+        break;
+      default:
+        printf("Opção inválida\n");
+        break;
+    }
+  }
 
-  No *raiz = &n1;
+  // Pessoa p1, p2, p3, p4;
 
-  n1.pessoa = &p1;
-  n2.pessoa = &p2;
-  n3.pessoa = &p3;
-  n4.pessoa = &p4;
+  // No n1, n2, n3, n4;
 
-  n1.filho1 = &n2;
-  n1.filho2 = &n3;
-  n1.filho3 = NULL;
+  // No *raiz = &n1;
 
-  n2.filho1 = &n4;
-  n2.filho2 = NULL;
-  n2.filho3 = NULL;
+  // n1.pessoa = &p1;
+  // n2.pessoa = &p2;
+  // n3.pessoa = &p3;
+  // n4.pessoa = &p4;
 
-  n3.filho1 = NULL;
-  n3.filho2 = NULL;
-  n3.filho3 = NULL;
+  // n1.filho1 = &n2;
+  // n1.filho2 = &n3;
+  // n1.filho3 = NULL;
 
-  n4.filho1 = NULL;
-  n4.filho2 = NULL;
-  n4.filho3 = NULL;
+  // n2.filho1 = &n4;
+  // n2.filho2 = NULL;
+  // n2.filho3 = NULL;
 
-  p1.nome = "Pedro";
-  p1.idade = 60;
+  // n3.filho1 = NULL;
+  // n3.filho2 = NULL;
+  // n3.filho3 = NULL;
 
-  p2.nome = "Andre";
-  p2.idade = 30;
+  // n4.filho1 = NULL;
+  // n4.filho2 = NULL;
+  // n4.filho3 = NULL;
 
-  p3.nome = "Marcelo";
-  p3.idade = 40;
+  // p1.nome = "Pedro";
+  // p1.idade = 60;
 
-  p4.nome = "Marcelo";
-  p4.idade = 10;
+  // p2.nome = "Andre";
+  // p2.idade = 30;
 
-  imprimir(raiz);
+  // p3.nome = "Marcelo";
+  // p3.idade = 40;
 
-  No *res = busca_prof(raiz, "Marcelo");
-  if (res != NULL)
-    printf("%s - %d\n", res->pessoa->nome, res->pessoa->idade);
-  else
-    printf("Não encontrado\n");
+  // p4.nome = "Marcelo";
+  // p4.idade = 10;
 
-  res = busca_larg(raiz, "Marcelo");
-  if (res != NULL)
-    printf("%s - %d\n", res->pessoa->nome, res->pessoa->idade);
-  else
-    printf("Não encontrado\n");
+  // imprimir(raiz);
 
-  No *n = criar_no();
-  No *pai = busca_prof(raiz, "George");
-  inserir_no(pai, n);
+  // No *res = busca_prof(raiz, "Marcelo");
+  // if (res != NULL)
+  //   printf("%s - %d\n", res->pessoa->nome, res->pessoa->idade);
+  // else
+  //   printf("Não encontrado\n");
+
+  // res = busca_larg(raiz, "Marcelo");
+  // if (res != NULL)
+  //   printf("%s - %d\n", res->pessoa->nome, res->pessoa->idade);
+  // else
+  //   printf("Não encontrado\n");
+
+  // No *n = criar_no();
+  // No *pai = busca_prof(raiz, "George");
+  // inserir_no(pai, n);
 
   return 0;
 }
