@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 typedef struct node {
   int num;
@@ -8,11 +9,15 @@ typedef struct node {
   struct node *dir;
 } No;
 
+No *remover(No *node, int num);
+
 No *criar_no() {
   No *node = (No *)malloc(sizeof(No));
 
-  printf("Digite o numero: ");
-  scanf("%d", &node->num);
+  // printf("Digite o numero: ");
+  // scanf("%d", &node->num);
+  node->num = rand() % 100;
+  printf("%d, ", node->num);
 
   node->esq = NULL;
   node->dir = NULL;
@@ -56,7 +61,7 @@ No *buscar_no(No *node, int num) {
     return node;
   }
 
-  if (node->num > num) {
+  if (node->num < num) {
     return buscar_no(node->dir, num);
   } else {
     return buscar_no(node->esq, num);
@@ -96,17 +101,163 @@ void buscar_raiz(No *raiz) {
   }
 }
 
+No *buscar_pai(No *node, int num) {
+  if (node == NULL) return NULL;
+
+  if ((node->esq != NULL) && (node->esq->num == num)) {
+    return node;
+  }
+
+  if ((node->dir != NULL) && (node->dir->num == num)) {
+    return node;
+  }
+
+  if (node->num < num) {
+    return buscar_pai(node->dir, num);
+  } else {
+    return buscar_pai(node->esq, num);
+  }
+}
+
+bool um_filho(No *node) {
+  // return (node->esq == NULL) && (node->dir == NULL);
+  if ((node->esq == NULL) && (node->dir != NULL)) {
+    return true;
+  }
+
+  if ((node->esq != NULL) && (node->dir == NULL)) {
+    return true;
+  }
+
+  return false;
+}
+
+bool eh_folha(No *node) {
+  // return (node->esq == NULL) && (node->dir == NULL);
+  if ((node->esq == NULL) && (node->dir == NULL)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+No *maior(No *node) {
+  if (node == NULL) return NULL;
+  if (node->dir == NULL) return node;
+  return maior(node->dir);
+}
+
+void substituir(No *pai, No *removido) {
+  if (um_filho(removido)) {
+    if (removido->esq != NULL) {
+      pai->esq = removido->esq;
+    } else {
+      pai->dir = removido->dir;
+    }
+  } else {
+    No *substituto = maior(removido->esq);
+    remover(pai, substituto->num);
+    substituto->esq = removido->esq;
+    substituto->dir = removido->dir;
+    if (pai->num < substituto->num) {
+      pai->dir = substituto;
+    } else {
+      pai->esq = substituto;
+    }
+    removido->dir = NULL;
+    removido->esq = NULL;
+  }
+}
+
+No *remover(No *node, int num) {
+  No *pai = buscar_pai(node, num);
+  if (pai == NULL) {
+    printf("Numero não encontrado");
+    return NULL;
+  } else {
+    // printf("Pai: %d\n", pai->num);
+    No *removido = NULL;
+    if (pai->num < num) {
+      removido = pai->dir;
+      if (eh_folha(removido)) {
+        pai->dir = NULL;
+      } else {
+        substituir(pai, removido);
+      }
+    } else {
+      removido = pai->esq;
+      if (eh_folha(removido)) {
+        pai->esq = NULL;
+      } else {
+        substituir(pai, removido);
+      }
+    }
+    // printf("Removido: %d\n", removido->num);
+    return removido;
+  }
+}
+
+void remover_raiz(No **raiz) {
+  int num = 0;
+  printf("Digite o numero: ");
+  scanf("%d", &num);
+
+  if (*raiz == NULL) {
+    printf("Árvore vazia\n");
+    return;
+  }
+
+  if ((*raiz)->num == num) {
+    if (eh_folha(*raiz)) {
+      free(*raiz);
+      *raiz = NULL;
+      return;
+    }
+
+    if (um_filho(*raiz)) {
+      No *remover = *raiz;
+      if ((*raiz)->esq != NULL) {
+        *raiz = (*raiz)->esq;
+      } else {
+        *raiz = (*raiz)->dir;
+      }
+      free(remover);
+    } else {
+      No *substituto = maior((*raiz)->esq);
+      remover(*raiz, substituto->num);
+      substituto->esq = (*raiz)->esq;
+      substituto->dir = (*raiz)->dir;
+      (*raiz)->esq = NULL;
+      (*raiz)->dir = NULL;
+      free(*raiz);
+      *raiz = substituto;
+    }
+
+  } else {
+    remover(*raiz, num);
+  }
+}
+
 void menu() {
   printf("MENU\n");
   printf("1-Inserir\n");
   printf("2-Buscar\n");
   printf("3-Imprimir Árvore\n");
+  printf("4-Remover\n");
+  printf("5-Arvore aleatoria\n");
   printf("0-Sair\n");
 }
 
-int main(int argc, char const *argv[]) {
-  No *root = NULL;
+void arvore_aleatoria(No **root) {
+  for (int i = 0; i < 10; i++) {
+    inserir_raiz(root);
+  }
+}
 
+int main(int argc, char const *argv[]) {
+  srand(time(NULL));
+
+  No *root = NULL;
   int opc = 1;
   while (opc != 0) {
     menu();
@@ -120,6 +271,12 @@ int main(int argc, char const *argv[]) {
         break;
       case 3:
         imprimir(root);
+        break;
+      case 4:
+        remover_raiz(&root);
+        break;
+      case 5:
+        arvore_aleatoria(&root);
         break;
       case 0:
         break;
