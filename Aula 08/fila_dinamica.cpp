@@ -2,109 +2,102 @@
 #include <stdlib.h>
 
 typedef struct elem {
-  int conteudo;
-  struct elem *prox;
+  int content = 0;
+  struct elem *prox = NULL;
 } element;
 
-void enqueue(element **last, element *e, element **first = NULL) {
-  e->prox = NULL;
-  if (*last == NULL) {
-    *first = e;
-    *last = e;
-    return;
+typedef struct {
+  element *first = NULL;
+  element *last = NULL;
+  int length = 0;
+} queue;
+
+void enqueue(queue *q, int content) {
+  element *new_elem = (element *)malloc(sizeof(element));
+  new_elem->content = content;
+
+  q->length++;
+  if (q->last == NULL) {
+    q->first = new_elem;
+    q->last = new_elem;
+  } else {
+    q->last->prox = new_elem;
+    q->last = new_elem;
   }
-  (*last)->prox = e;
-  *last = e;
 }
 
-element *dequeue(element **first, element **last = NULL) {
-  if (*first == NULL) {
+element *dequeue(queue *q) {
+  if (q->length == 0) {
     return NULL;
   }
-  element *front = *first;
-  (*first) = (*first)->prox;
-  if (*first == NULL) {
-    *last == NULL;
+
+  q->length--;
+  element *front = q->first;
+  q->first = q->first->prox;
+  if (q->length == 0) {
+    q->last = NULL;
   }
+
   front->prox = NULL;
   return front;
 }
 
-void print(element *aux) {
+void print(queue *q) {
+  element *aux = q->first;
   while (aux != NULL) {
-    printf("%d -> ", aux->conteudo);
+    printf("%d->", aux->content);
     aux = aux->prox;
   }
   printf("NULL\n");
 }
 
-int size(element *aux) {
-  int s = 0;
-  while (aux != NULL) {
-    s++;
-    aux = aux->prox;
-  }
-  return s;
-}
+int size(queue *q) { return q->length; }
 
-void clear(element **first) {
-  element *aux = dequeue(first);
+void clear(queue *q) {
+  element *aux = dequeue(q);
   while (aux != NULL) {
-    // free(aux);
-    aux = dequeue(first);
+    free(aux);
+    aux = dequeue(q);
   }
 }
 
-int position(element *aux, element *e) {
-  int s = 0;
+int position(queue *q, element *e) {
+  int pos = 0;
+  element *aux = q->first;
   while (aux != NULL) {
-    s++;
-    if (e->conteudo == aux->conteudo) {
-      return s;
+    pos++;
+    if (e->content == aux->content) {
+      return pos;
     }
     aux = aux->prox;
   }
   return -1;
 }
 
-bool is_empty(element *first) {
-  return (first == NULL);
-  //   if (top == NULL) {
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-}
+bool is_empty(queue *q) { return (q->length == 0); }
 
 int main(int argc, char const *argv[]) {
-  element *first = NULL;
-  element *last = NULL;
+  queue q;
 
-  element e1, e2, e3, e4;
-  e1.conteudo = 27;
-  e2.conteudo = 22;
-  e3.conteudo = 13;
-  e4.conteudo = 4;
+  enqueue(&q, 27);
+  enqueue(&q, 21);
+  enqueue(&q, 14);
+  enqueue(&q, 36);
 
-  enqueue(&last, &e1, &first);
-  enqueue(&last, &e2);
-  enqueue(&last, &e3);
-  enqueue(&last, &e4);
-  print(first);
+  print(&q);
+  printf("size: %d\n", size(&q));
 
-  printf("Tam: %d\n", size(first));
+  element *p = dequeue(&q);
+  printf("dequeue: %d\n", p->content);
 
-  printf("Position: %d, %d\n", position(first, &e2), e2.conteudo);
+  print(&q);
+  printf("size: %d\n", size(&q));
+  printf("is_empty: %d\n", is_empty(&q));
 
-  element *p = dequeue(&first);
-  printf("Dequeue: %d\n", p->conteudo);
-  print(first);
+  printf("clear\n");
+  clear(&q);
 
-  printf("is_empty: %d\n", is_empty(first));
-
-  clear(&first);
-
-  printf("is_empty: %d\n", is_empty(first));
+  printf("is_empty: %d\n", is_empty(&q));
 
   return 0;
 }
