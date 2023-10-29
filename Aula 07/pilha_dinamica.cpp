@@ -2,98 +2,78 @@
 #include <stdlib.h>
 
 typedef struct elem {
-  int conteudo;
-  struct elem *prox;
+  int conteudo = 0;
+  struct elem *prox = NULL;
 } element;
 
-void push(element **top, element *e) {
-  e->prox = *top;
-  *top = e;
-}
+typedef struct {
+  element *top = NULL;
+  int length = 0;
+} stack;
 
-element *pop(element **top) {
-  if (*top == NULL) {
-    return NULL;
-  }
-  element *p = *top;
-  *top = (*top)->prox;
-  p->prox = NULL;
-  return p;
-}
+int size(stack *s) { return s->length; }
 
-void print(element *aux) {
+element *top(stack *s) { return s->top; }
+
+void print(stack *s) {
+  element *aux = s->top;
   while (aux != NULL) {
-    printf("%d\n", aux->conteudo);
+    printf("%d|", aux->conteudo);
     aux = aux->prox;
   }
-  printf("NULL\n");
+  printf("\n");
 }
 
-int size(element *aux) {
-  int s = 0;
+void push(stack *s, int content) {
+  element *new_elem = (element *)malloc(sizeof(element));
+  new_elem->conteudo = content;
+  new_elem->prox = s->top;
+  s->top = new_elem;
+  s->length++;
+}
+
+element *pop(stack *s) {
+  if (s->length == 0) return NULL;
+
+  element *rem = s->top;
+  s->top = rem->prox;
+  rem->prox = NULL;
+  s->length--;
+  return rem;
+}
+
+void clear(stack *s) {
+  element *aux = pop(s);
   while (aux != NULL) {
-    s++;
-    aux = aux->prox;
-  }
-  return s;
-}
-
-void clear(element **top) {
-  element *aux = pop(top);
-  while (aux != NULL) {
-    // free(aux);
-    aux = pop(top);
+    free(aux);
+    aux = pop(s);
   }
 }
 
-int position(element *aux, element *e) {
-  int s = 0;
-  while (aux != NULL) {
-    s++;
-    if (e->conteudo == aux->conteudo) {
-      return s;
-    }
-    aux = aux->prox;
-  }
-  return -1;
-}
-
-bool is_empty(element *top) {
-  return (top == NULL);
-  //   if (top == NULL) {
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-}
+bool is_empty(stack *s) { return (size(s) == 0); }
 
 int main(int argc, char const *argv[]) {
-  element *top = NULL;
+  stack s;
 
-  element e1, e2, e3, e4;
-  e1.conteudo = 27;
-  e2.conteudo = 22;
-  e3.conteudo = 13;
-  e4.conteudo = 4;
+  push(&s, 27);
+  push(&s, 21);
+  push(&s, 14);
+  push(&s, 36);
 
-  push(&top, &e1);
-  push(&top, &e2);
-  push(&top, &e3);
-  push(&top, &e4);
-  print(top);
+  print(&s);
+  printf("size: %d\n", size(&s));
 
-  printf("Tam: %d\n", size(top));
+  element *p = pop(&s);
+  printf("pop: %d\n", p->conteudo);
 
-  printf("Position: %d, %d\n", position(top, &e2), e2.conteudo);
+  print(&s);
+  printf("size: %d\n", size(&s));
+  printf("is_empty: %d\n", is_empty(&s));
 
-  element *p = pop(&top);
-  printf("Pop: %d\n", p->conteudo);
+  printf("clear\n");
+  clear(&s);
 
-  printf("is_empty: %d\n", is_empty(top));
-
-  clear(&top);
-
-  printf("is_empty: %d\n", is_empty(top));
+  printf("is_empty: %d\n", is_empty(&s));
 
   return 0;
 }
